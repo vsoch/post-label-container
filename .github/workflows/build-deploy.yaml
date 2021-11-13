@@ -59,6 +59,7 @@ jobs:
           file: ${{ matrix.container[1] }}
           platforms: ${{ matrix.arch }}
           context: .
+          load: true
           tags: ${{ env.container }}
           build-args: base=${{ matrix.container[0] }}
 
@@ -71,6 +72,7 @@ jobs:
           printf "Saving compiler labels ${labels}\n"         
           echo "compiler_labels=${labels}" >> $GITHUB_ENV
           # Prepare to use base image and add labels
+          docker images
           echo "FROM ${{ env.container }}" > Dockerfile.tmp
       
       - name: Label and Deploy 
