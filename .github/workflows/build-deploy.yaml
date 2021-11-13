@@ -68,6 +68,7 @@ jobs:
       - name: Derive Compiler Labels
         id: labels
         run: |
+          docker images | grep ghcr.io
           docker run -i --rm ${{ env.container }} spack compiler list --flat > compilers.txt
           labels=$(echo $(tr '\r\n' ',' < compilers.txt))
           labels="org.spack.compilers=${labels}"
