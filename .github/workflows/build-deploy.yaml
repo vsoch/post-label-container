@@ -20,7 +20,7 @@ jobs:
         # https://github.com/buildsi/spack-containers/blob/11cbac76201e963006b2321e30b153f38687505f/.github/workflows/build-containers.yaml#L24
 
                      # base image   # dockerfile
-        container: [[ubuntu-20.04, Dockerfile]]
+        container: [["ubuntu:20.04", Dockerfile]]
         arch: ['linux/amd64', 'linux/ppc64le', 'linux/arm64']
 
     name: Build ${{ matrix.container[0] }} ${{ matrix.arch }}
@@ -31,9 +31,11 @@ jobs:
       - name: Set Container Name
         env:
           arch: ${{ matrix.arch }}
+          base: ${{ matrix.container[0] }}
         run: |
           tag=$(echo ${arch/\//-})
-          container="ghcr.io/vsoch/spack-${{ matrix.container[0] }}:${tag}"
+          base=$(echo ${base/:/-})
+          container="ghcr.io/vsoch/spack-${base}:${tag}"
           echo "container=${container}" >> $GITHUB_ENV
 
       - name: Set up QEMU
