@@ -53,13 +53,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # This is done intentionaly with one arch - it won't work with multiple
-      - name: Derive Labels and Build
+      - name: Build Container
         uses: docker/build-push-action@v2
         with:
           file: ${{ matrix.container[1] }}
           platforms: ${{ matrix.arch }}
           context: .
-          load: true
           tags: ${{ env.container }}
           build-args: base=${{ matrix.container[0] }}
 
@@ -74,7 +73,7 @@ jobs:
           # Prepare to use base image and add labels
           echo "FROM ${{ env.container }}" > Dockerfile.tmp
       
-      - name: Deploy ${{ env.container }}
+      - name: Label and Deploy 
         uses: docker/build-push-action@v2
         with:
           file: Dockerfile.tmp
