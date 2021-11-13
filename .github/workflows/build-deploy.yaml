@@ -51,18 +51,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # This is done intentionaly with one arch - it won't work with multiple
       - name: Build Container
-        uses: docker/build-push-action@v2
-        with:
-          file: ${{ matrix.container[1] }}
-          platforms: ${{ matrix.arch }}
-          context: .
-          load: true
-          tags: ${{ env.container }}
-          build-args: base=${{ matrix.container[0] }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: docker buildx build --build-arg base=${{ matrix.container[0] }} --tag ${{ env.container }} --platform ${{ matrix.arch }} --cache-from type=gha --cache-to type=gha,mode=max --file ${{ matrix.container[1] }} .
+
+#        uses: docker/build-push-action@v2
+#        with:
+#          file: ${{ matrix.container[1] }}
+##          platforms: ${{ matrix.arch }}
+#          context: .
+#          load: true
+#          tags: ${{ env.container }}
+#          build-args: base=${{ matrix.container[0] }}
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
 
       - name: Derive Compiler Labels
         id: labels
@@ -72,8 +73,6 @@ jobs:
           labels="org.spack.compilers=${labels}"
           printf "Saving compiler labels ${labels}\n"         
           echo "compiler_labels=${labels}" >> $GITHUB_ENV
-          # Prepare to use base image and add labels
-          docker images
           echo "FROM ${{ env.container }}" > Dockerfile.tmp
       
       - name: Label Container
