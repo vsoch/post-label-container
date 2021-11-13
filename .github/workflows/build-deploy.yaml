@@ -57,14 +57,15 @@ jobs:
           file: ${{ matrix.container[1] }}
           platforms: ${{ matrix.arch }}
           context: .
-          push: true
-#          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.container }}
           build-args: base=${{ matrix.container[0] }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+        # This won't be able to find the container from above unless we've pushed
       - name: Derive Compiler Labels
+        if: ${{ github.event_name != 'pull_request' }}
         id: labels
         run: |
           docker images
@@ -76,13 +77,13 @@ jobs:
           echo "FROM ${{ env.container }}" > Dockerfile.tmp
       
       - uses: docker/build-push-action@v2
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           file: Dockerfile.tmp
           platforms: ${{ matrix.arch }}
           context: .
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          push: true
-#          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.container }}
           labels: ${{ env.compiler_labels }}
