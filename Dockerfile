@@ -53,7 +53,7 @@ RUN python -m pip install --upgrade pip setuptools wheel \
 
 ENV SPACK_ROOT=/opt/spack
     
-RUN git clone --depth 1 -b vsoch/db-1 https://github.com/vsoch/spack /opt/spack && \
+RUN git clone --depth 1 -b vsoch/db-17 https://github.com/vsoch/spack /opt/spack && \
     cd /opt/spack && \
     . share/spack/setup-env.sh && \
     spack compiler find
