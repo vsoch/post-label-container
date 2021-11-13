@@ -6,7 +6,7 @@ others. The example here will build a simple container with spack, and then
 generate (and apply) some labels after the fact. This works doing the following:
 
 1. Define a [Dockerfile](Dockerfile) with something that warrants post-labeling. I chose spack compilers.
-2. Use the [GitHub Workflow](.github/workflows/build-deploy.yaml) to build a matrix of containers and apply the label post build.
+2. Use the [GitHub Workflow](.github/workflows/build-deploy.yaml) to build a matrix of containers and apply the label post build for multiple arches, or a [simpler workflow](.github/workflows/simple-build-deploy.yaml) that does the same.
 
 The workflow uses buildx, but separates arches into separate builds, each with a different container
 architecture (and tagged appropriately).
