@@ -76,14 +76,20 @@ jobs:
           docker images
           echo "FROM ${{ env.container }}" > Dockerfile.tmp
       
-      - name: Label and Deploy 
-        uses: docker/build-push-action@v2
-        with:
-          file: Dockerfile.tmp
-          platforms: ${{ matrix.arch }}
-          context: .
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ env.container }}
-          labels: ${{ env.compiler_labels }}
+      - name: Label Container
+        run: docker buildx build --label ${{ env.compiler_labels }} --tag ghcr.io/vsoch/spack-ubuntu-20.04:linux-amd64 --platform ${{ matrix.arch }} --cache-from type=gha --cache-to type=gha,mode=max --file Dockerfile.tmp .
+
+      - name: Push Container
+        if: (github.event_name != 'pull_request')
+        run: docker push --all-tags ${{ env.container }}
+
+#        uses: docker/build-push-action@v2
+#        with:
+#          file: Dockerfile.tmp
+#          platforms: ${{ matrix.arch }}
+#          context: .
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=max
+#          push: ${{ github.event_name != 'pull_request' }}
+#          tags: ${{ env.container }}
+#          labels: ${{ env.compiler_labels }}
