@@ -20,7 +20,7 @@ jobs:
         # https://github.com/buildsi/spack-containers/blob/11cbac76201e963006b2321e30b153f38687505f/.github/workflows/build-containers.yaml#L24
 
                      # base image   # dockerfile
-        container: [[ubuntu-20.04, Dockerfile]]
+        container: [["ubuntu:20.04", Dockerfile]]
         arch: ['linux/amd64', 'linux/ppc64le', 'linux/arm64']
 
     name: Build ${{ matrix.container[0] }} ${{ matrix.arch }}
@@ -29,8 +29,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set Container Name
+        env:
+          arch: ${{ matrix.arch }}
+          base: ${{ matrix.container[0] }}
         run: |
-          container="ghcr.io/vsoch/spack-${{ matrix.container[0] }}:${{ matrix.arch }}"
+          tag=$(echo ${arch/\//-})
+          base=$(echo ${base/:/-})
+          container="ghcr.io/vsoch/spack-${base}:${tag}"
           echo "container=${container}" >> $GITHUB_ENV
 
       - name: Set up QEMU
@@ -40,41 +45,45 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Log in to GitHub Container Registry
-        if: (github.event_name != 'pull_request')
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # This is done intentionaly with one arch - it won't work with multiple
-      - name: Derive Labels and Build
-        uses: docker/build-push-action@v2
+        # Note that we can't get the image in the next step without push!
+      - uses: docker/build-push-action@v2
         with:
           file: ${{ matrix.container[1] }}
           platforms: ${{ matrix.arch }}
           context: .
-          load: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.container }}
           build-args: base=${{ matrix.container[0] }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
+        # This won't be able to find the container from above unless we've pushed
       - name: Derive Compiler Labels
+        if: ${{ github.event_name != 'pull_request' }}
         id: labels
         run: |
+          docker images
           docker run -i --rm ${{ env.container }} spack compiler list --flat > compilers.txt
           labels=$(echo $(tr '\r\n' ',' < compilers.txt))
           labels="org.spack.compilers=${labels}"
           printf "Saving compiler labels ${labels}\n"         
           echo "compiler_labels=${labels}" >> $GITHUB_ENV
-          # Prepare to use base image and add labels
           echo "FROM ${{ env.container }}" > Dockerfile.tmp
       
-      - name: Deploy ${{ env.container }}
-        uses: docker/build-push-action@v2
+      - uses: docker/build-push-action@v2
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           file: Dockerfile.tmp
           platforms: ${{ matrix.arch }}
           context: .
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.container }}
           labels: ${{ env.compiler_labels }}

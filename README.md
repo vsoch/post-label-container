@@ -21,3 +21,10 @@ only have that base available. For this reason, I separated the architectures ou
 and then had one workflow per architecture, making sure to include the architecture
 as the tag so that there wouldn't be a race to push different containers to the same tag.
 
+## Why do we do a push 
+
+I tried using load and the cache to preserve the container between steps, but
+every time it wanted to pull from (a non-existing) container URI, and given that
+the container did exist, it would be incorrectly pulling an older image each time.
+So instead I opted for running the labeling and final deploy just on push to main,
+and for a pull request I do a vanilla build that does not push.
