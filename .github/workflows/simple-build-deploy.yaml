@@ -26,7 +26,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+      - uses: actions/setup-go@v2
+      - name: Install crane
+        run: go install github.com/google/go-containerregistry/cmd/crane@latest
       - name: Set Container Name
         env:
           base: ${{ matrix.container[0] }}
@@ -50,10 +52,10 @@ jobs:
         run: |
           docker run -i --rm ${{ env.container }} spack compiler list --flat > compilers.txt
           labels=$(echo $(tr '\r\n' ',' < compilers.txt))
-          labels="org.spack.compilers=${labels}"
+          labels="org.spack.compilers=${labels}"          
           printf "Saving compiler labels ${labels}\n"         
-          echo "FROM ${{ env.container }}" > Dockerfile.tmp
-          docker build -t ${{ env.container }} -f Dockerfile.tmp --label ${labels} .
+          crane mutate --label ${labels}
+          docker inspect -f {{.Config.Labels}} ${{ env.container }}
 
       - name: Deploy
         if: ${{ github.event_name != 'pull_request' }}
