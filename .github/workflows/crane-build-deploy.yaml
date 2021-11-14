@@ -54,5 +54,5 @@ jobs:
           labels="org.spack.compilers=${labels}"          
           printf "Saving compiler labels ${labels}\n"         
           docker push ${{ env.container }}
-          crane mutate ${{ env.container }} --label ${labels}
+          crane mutate ${{ env.container }} --label "${labels}"
           docker inspect -f {{.Config.Labels}} ${{ env.container }}
