@@ -9,7 +9,7 @@ generate (and apply) some labels after the fact. This works doing the following:
 2. Use a GitHub workflow to apply a label and deploy. We have three methods:
   a. Use the [Multi architecture](.github/workflows/build-deploy.yaml) workflow to build a matrix of containers and apply the label post build for multiple arches
   b. A [simpler workflow](.github/workflows/simple-build-deploy.yaml) that does the same
-  c. Use [crane](.github/workflows/crane-build-deploy.yaml) to mutate the existing config and add the same new label.
+  c. Use [crane](.github/workflows/crane-build-deploy.yaml) to mutate the existing config and add the same new label, but only works after push.
 
 The first workflow uses buildx, but separates arches into separate builds, each with a different container
 architecture (and tagged appropriately).
