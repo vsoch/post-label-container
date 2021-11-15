@@ -6,9 +6,12 @@ others. The example here will build a simple container with spack, and then
 generate (and apply) some labels after the fact. This works doing the following:
 
 1. Define a [Dockerfile](Dockerfile) with something that warrants post-labeling. I chose spack compilers.
-2. Use the [GitHub Workflow](.github/workflows/build-deploy.yaml) to build a matrix of containers and apply the label post build for multiple arches, or a [simpler workflow](.github/workflows/simple-build-deploy.yaml) that does the same.
+2. Use a GitHub workflow to apply a label and deploy. We have three methods:
+  a. Use the [Multi architecture](.github/workflows/build-deploy.yaml) workflow to build a matrix of containers and apply the label post build for multiple arches
+  b. A [simpler workflow](.github/workflows/simple-build-deploy.yaml) that does the same
+  c. Use [crane](.github/workflows/crane-build-deploy.yaml) to mutate the existing config and add the same new label, but only works after push.
 
-The workflow uses buildx, but separates arches into separate builds, each with a different container
+The first workflow uses buildx, but separates arches into separate builds, each with a different container
 architecture (and tagged appropriately).
 
 ## Why can't we do all platforms at once with buildx?

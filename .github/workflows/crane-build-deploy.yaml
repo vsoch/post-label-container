@@ -1,7 +1,10 @@
-name: Simple Build Containers
-
-# You can add pull request or other trigger here
-on: workflow_dispatch
+name: Crane Label Containers
+on: 
+  workflow_dispatch: []
+  pull_request: []
+  push: 
+    branches:
+      - main
 
 jobs:
   build:
@@ -23,13 +26,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
+      - uses: actions/setup-go@v2
+      - uses: imjasonh/setup-crane@main
       - name: Set Container Name
         env:
           base: ${{ matrix.container[0] }}
         run: |
           base=$(echo ${base/:/-})
-          container="ghcr.io/vsoch/spack-simple-${base}:latest"
+          container="ghcr.io/vsoch/spack-crane-${base}:latest"
           echo "container=${container}" >> $GITHUB_ENV
 
       - name: Log in to GitHub Container Registry
@@ -47,12 +51,8 @@ jobs:
         run: |
           docker run -i --rm ${{ env.container }} spack compiler list --flat > compilers.txt
           labels=$(echo $(tr '\r\n' ',' < compilers.txt))
-          labels="org.spack.compilers=${labels}"
+          labels="org.spack.compilers=${labels}"          
           printf "Saving compiler labels ${labels}\n"         
-          echo "FROM ${{ env.container }}" > Dockerfile.tmp
-          docker build -t ${{ env.container }} -f Dockerfile.tmp --label ${labels} .
-
-      - name: Deploy
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-           docker push ${{ env.container }}
+          docker push ${{ env.container }}
+          crane mutate ${{ env.container }} --label "${labels}"
+          docker inspect -f {{.Config.Labels}} ${{ env.container }}
