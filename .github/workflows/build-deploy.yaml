@@ -1,10 +1,7 @@
 name: Build Containers
-on: 
-  workflow_dispatch: []
-  pull_request: []
-  push: 
-    branches:
-      - main
+
+# you can add other triggers here like push, pull_request
+on: workflow_dispatch
 
 jobs:
   build:
