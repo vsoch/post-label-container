@@ -27,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/setup-go@v2
-      - uses: imjasonh/setup-crane@01d26682810dcd47bfc8eb1efe791558123a9373
+      - uses: imjasonh/setup-crane
       - name: Set Container Name
         env:
           base: ${{ matrix.container[0] }}
